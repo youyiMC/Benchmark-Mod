@@ -3,6 +3,10 @@
   "benchmark.configuration.section.benchmark.common.toml": "Benchmark Configs",
   "benchmark.configuration.section.benchmark.common.toml.title": "Benchmark Configs",
   "benchmark.configuration.reportDirectory": "Report Directory",
+  "benchmark.configuration.reportFormat": "Report Format",
+  "benchmark.configuration.reportFormat.markdown": "Markdown (.md)",
+  "benchmark.configuration.reportFormat.plain_text": "Plain text (.txt)",
+  "benchmark.configuration.reportFormat.both": "Both (.md + .txt)",
   "benchmark.configuration.defaultTestDuration": "Default Test Duration",
   "benchmark.configuration.enableGpuUsageDetection": "Enable GPU Usage Detection",
 
@@ -41,6 +45,7 @@
   "benchmark.gui.result_gpu_na": "GPU Usage: unavailable (no nvidia-smi / rocm-smi / amdsmi-cli / Windows perf counters found)",
   "benchmark.gui.result_vram": "VRAM Used: avg %s MB",
   "benchmark.gui.report_hint": "Full report saved to: %s",
+  "benchmark.gui.report_failed": "Report could not be written; see the game log.",
   "benchmark.chat.completed": "Performance test completed. Open BenchMark from the pause menu to view results.",
   "benchmark.chat.started": "Performance test started, will run for %s seconds."
 }

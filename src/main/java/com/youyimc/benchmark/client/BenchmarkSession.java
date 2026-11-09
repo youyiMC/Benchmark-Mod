@@ -20,11 +20,13 @@
 package com.youyimc.benchmark.client;
 
 import java.lang.management.ManagementFactory;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.sun.management.OperatingSystemMXBean;
+import com.youyimc.benchmark.Benchmark;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -67,7 +69,7 @@ public class BenchmarkSession {
     private long lastServerSampleNanos = 0;
 
     private BenchmarkResult result = null;
-    private String reportPath = null;
+    private final List<Path> reportPaths = new ArrayList<>();
 
     private BenchmarkSession() {
     }
@@ -80,8 +82,8 @@ public class BenchmarkSession {
         return result;
     }
 
-    public String getReportPath() {
-        return reportPath;
+    public List<Path> getReportPaths() {
+        return reportPaths;
     }
 
     public double getTargetDurationSeconds() {
@@ -112,7 +114,7 @@ public class BenchmarkSession {
         this.lastServerTickCount = -1;
         this.lastServerSampleNanos = 0;
         this.result = null;
-        this.reportPath = null;
+        this.reportPaths.clear();
         long now = System.nanoTime();
         this.startNanos = now;
         this.lastFrameNanos = now;
@@ -271,10 +273,11 @@ public class BenchmarkSession {
                 new ArrayList<>(memSamples),
                 new ArrayList<>(gpuSamples),
                 new ArrayList<>(msptSamples),
+                Benchmark.modVersion(),
                 hardware);
 
         ReportWriter.writeReport(result);
-        this.reportPath = result.reportPath;
+        this.reportPaths.addAll(result.reportPaths);
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {

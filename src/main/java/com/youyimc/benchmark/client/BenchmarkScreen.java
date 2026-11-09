@@ -186,9 +186,14 @@ public class BenchmarkScreen extends Screen {
         for (String text : r.analysis) {
             lines.add(Component.literal(text).withStyle(ChatFormatting.GRAY));
         }
-        if (r.reportPath != null) {
+        if (!r.reportPaths.isEmpty()) {
             lines.add(Component.empty());
-            lines.add(Component.translatable("benchmark.gui.report_hint", r.reportPath).withStyle(ChatFormatting.GREEN));
+            for (Path path : r.reportPaths) {
+                lines.add(Component.translatable("benchmark.gui.report_hint", path.toString()).withStyle(ChatFormatting.GREEN));
+            }
+        } else {
+            lines.add(Component.empty());
+            lines.add(Component.translatable("benchmark.gui.report_failed").withStyle(ChatFormatting.RED));
         }
     }
 

@@ -19,6 +19,8 @@
  */
 package com.youyimc.benchmark.client;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,8 +58,11 @@ public class BenchmarkResult {
     public final List<Double> memSamples;
     public final List<Double> gpuSamples;
     public final List<Double> msptSamples;
+    /** Version of the mod that produced the result, written into the report header. */
+    public final String modVersion;
     public final HardwareInfo hardware;
-    public String reportPath;
+    /** Report file(s) written for this result; filled in by {@code ReportWriter}. */
+    public final List<Path> reportPaths = new ArrayList<>();
 
     public BenchmarkResult(long timestampMillis, double targetDurationSeconds, double actualDurationSeconds,
                            int totalFrames, double avgFps, double maxFps, double minFps, double low1Fps, double low01Fps,
@@ -66,7 +71,7 @@ public class BenchmarkResult {
                            double avgHeapMB, double maxHeapMB, boolean hasGpu, double avgGpu, double maxGpu,
                            double avgVramMB, double maxVramMB, List<String> analysis,
                            List<Double> frameTimesMs, List<Double> cpuSamples, List<Double> memSamples,
-                           List<Double> gpuSamples, List<Double> msptSamples, HardwareInfo hardware) {
+                           List<Double> gpuSamples, List<Double> msptSamples, String modVersion, HardwareInfo hardware) {
         this.timestampMillis = timestampMillis;
         this.targetDurationSeconds = targetDurationSeconds;
         this.actualDurationSeconds = actualDurationSeconds;
@@ -96,6 +101,7 @@ public class BenchmarkResult {
         this.memSamples = memSamples;
         this.gpuSamples = gpuSamples;
         this.msptSamples = msptSamples;
+        this.modVersion = modVersion;
         this.hardware = hardware;
     }
 }

@@ -30,6 +30,11 @@ public class Config {
             .comment("The folder (relative to the game directory) where benchmark reports are saved.")
             .define("reportDirectory", "benchmark_reports");
 
+    // File format of the generated report: Markdown (default), plain text or both.
+    public static final ModConfigSpec.EnumValue<ReportFormat> REPORT_FORMAT = BUILDER
+            .comment("Report file format: MARKDOWN (default, .md), PLAIN_TEXT (legacy, .txt) or BOTH.")
+            .defineEnum("reportFormat", ReportFormat.MARKDOWN);
+
     // Default test duration in seconds for the duration slider.
     public static final ModConfigSpec.IntValue DEFAULT_TEST_DURATION = BUILDER
             .comment("Default benchmark test duration in seconds.")

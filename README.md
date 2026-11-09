@@ -1,6 +1,6 @@
 # BenchMark
 
-A client-side **Minecraft performance benchmarking mod** for **NeoForge 1.21.1**. It adds a button to the pause screen that opens a benchmark menu: it captures your hardware info, runs a configurable-duration FPS/TPS test, samples CPU/GPU/memory usage, analyses the results, and generates a timestamped plain-text report you can directly upload to an AI for deeper analysis.
+A client-side **Minecraft performance benchmarking mod** for **NeoForge 1.21.1**. It adds a button to the pause screen that opens a benchmark menu: it captures your hardware info, runs a configurable-duration FPS/TPS test, samples CPU/GPU/memory usage, analyses the results, and generates a timestamped **Markdown** report you can directly upload to an AI for deeper analysis.
 
 > English introduction first, 中文介绍请见下方（Chinese version below).
 
@@ -16,7 +16,7 @@ A client-side **Minecraft performance benchmarking mod** for **NeoForge 1.21.1**
 - **Lightweight sampling** — hardware sampling runs on a background thread and is throttled so it never skews the test.
 - **Chat notifications** — you are told when a test starts and when it finishes.
 - **Results screen** — reopen the menu to see the latest results and the mod's auto-generated bottleneck analysis.
-- **AI-friendly report** — a timestamped `.txt` report is saved to `./benchmark_reports/`, containing an **AI key-value summary**, full statistics, frame-time percentiles, raw sample series and analysis text.
+- **AI-friendly report** — a timestamped **Markdown (`.md`)** report is saved to `./benchmark_reports/`: statistics as tables, an **AI key-value summary** in a fenced block, frame-time percentiles, raw sample series and analysis text. Plain text (`.txt`, legacy) or both formats can be selected with the `reportFormat` config option.
 
 ## 🚀 Getting Started
 
@@ -29,10 +29,26 @@ A client-side **Minecraft performance benchmarking mod** for **NeoForge 1.21.1**
 ### Report location
 
 ```
-<game dir>/benchmark_reports/benchmark_report_YYYYMMDD_HHmmss.txt
+<game dir>/benchmark_reports/benchmark_report_YYYYMMDD_HHmmss.md
 ```
 
-The default report folder can be changed in the mod config (`reportDirectory`).
+Since **1.1.0** the report is Markdown by default — GitHub, editors and AI chat clients all render it. Set `reportFormat` to `PLAIN_TEXT` for the old `.txt` layout, or to `BOTH` to get one file of each. The default report folder can be changed in the mod config (`reportDirectory`).
+
+The document starts like this:
+
+```markdown
+# BenchMark 性能测试报告 / Benchmark Report
+
+- **生成时间 / Generated at**：2026-08-18 19:27:41
+- **模组版本 / Mod version**：1.1.0
+
+## 帧率统计 / FPS Statistics
+
+| 指标 | 数值 |
+| --- | --- |
+| 平均帧率 | 78.1 FPS |
+| 1% Low | 13.7 FPS |
+```
 
 ## 📊 What gets measured
 
@@ -47,10 +63,9 @@ The default report folder can be changed in the mod config (`reportDirectory`).
 
 ## 🤖 Report for AI analysis
 
-Each report starts with a machine-friendly key-value block:
+Each report keeps a machine-friendly key-value block (inside a fenced code block, so the Markdown around it does not interfere):
 
 ```
-==== AI 环境摘要（Key-Value）====
 CPU_MODEL: ...
 GPU_MODEL: ...
 MEMORY_TOTAL_MB: ...
@@ -62,6 +77,7 @@ P1_LOW_FPS: ...
 AVG_MSPT: ...
 AVG_CPU_PERCENT: ...
 AVG_GPU_PERCENT: ...
+MOD_VERSION: ...
 OS: ...
 ```
 
@@ -72,6 +88,7 @@ You can paste the whole file (or just the key-value block) into any AI for bottl
 The mod registers a config screen (Mods → BenchMark → Config):
 
 - `reportDirectory` — folder (relative to the game dir) for reports. Default: `benchmark_reports`.
+- `reportFormat` — report format: `MARKDOWN` (default, `.md`), `PLAIN_TEXT` (legacy, `.txt`) or `BOTH`.
 - `defaultTestDuration` — default slider value in seconds. Default: `30`.
 - `enableGpuUsageDetection` — allow querying external GPU tools / performance counters. Default: `true`.
 
@@ -93,7 +110,7 @@ The project scaffold is based on the [NeoForged MDK](https://github.com/NeoForge
 
 # BenchMark（模组中文介绍）
 
-一个面向 **NeoForge 1.21.1** 的**客户端性能测试模组**。它在游戏暂停界面添加一个按钮，打开性能测试菜单：抓取硬件信息、按设定时长运行 FPS/TPS 测试、持续采样 CPU/GPU/内存占用、分析结果，并生成带时间戳的纯文本报告，方便你直接上传给 AI 做进一步分析。
+一个面向 **NeoForge 1.21.1** 的**客户端性能测试模组**。它在游戏暂停界面添加一个按钮，打开性能测试菜单：抓取硬件信息、按设定时长运行 FPS/TPS 测试、持续采样 CPU/GPU/内存占用、分析结果，并生成带时间戳的 **Markdown 报告**，方便你直接上传给 AI 做进一步分析。
 
 ## ✨ 功能特性
 
@@ -105,7 +122,7 @@ The project scaffold is based on the [NeoForged MDK](https://github.com/NeoForge
 - **轻量采样** —— 所有硬件采样都在后台线程并限频执行，不会干扰测试结果。
 - **聊天通知** —— 测试开始与结束时都会在聊天框提示。
 - **结果界面** —— 重新打开菜单即可查看最新结果与模组自动生成的瓶颈分析。
-- **AI 友好报告** —— 报告保存到 `./benchmark_reports/`，包含 **AI 键值摘要**、完整统计、帧时间分位数、原始采样序列与分析文本。
+- **AI 友好报告** —— 自 **1.1.0** 起默认输出 **Markdown（`.md`）** 报告到 `./benchmark_reports/`：统计走表格、**AI 键值摘要**放进代码块、帧时间分位表、原始采样序列与分析文本一应俱全，可直接上传给 AI，也可在 GitHub/编辑器中正常渲染。`reportFormat` 配置项可切回旧版纯文本（`.txt`）或同时输出两种格式。
 
 ## 🚀 使用方法
 
@@ -118,10 +135,26 @@ The project scaffold is based on the [NeoForged MDK](https://github.com/NeoForge
 ### 报告位置
 
 ```
-<游戏目录>/benchmark_reports/benchmark_report_YYYYMMDD_HHmmss.txt
+<游戏目录>/benchmark_reports/benchmark_report_YYYYMMDD_HHmmss.md
 ```
 
-默认报告文件夹可在模组配置中修改（`reportDirectory`）。
+自 **1.1.0** 起报告默认使用 Markdown 格式（GitHub、编辑器、AI 聊天客户端都能正常渲染）。把 `reportFormat` 设为 `PLAIN_TEXT` 可回到旧版 `.txt` 排版，设为 `BOTH` 则两种格式同时输出。默认报告文件夹可在模组配置中修改（`reportDirectory`）。
+
+文档开头大致如下：
+
+```markdown
+# BenchMark 性能测试报告 / Benchmark Report
+
+- **生成时间 / Generated at**：2026-08-18 19:27:41
+- **模组版本 / Mod version**：1.1.0
+
+## 帧率统计 / FPS Statistics
+
+| 指标 | 数值 |
+| --- | --- |
+| 平均帧率 | 78.1 FPS |
+| 1% Low | 13.7 FPS |
+```
 
 ## 📊 采集指标
 
@@ -136,13 +169,32 @@ The project scaffold is based on the [NeoForged MDK](https://github.com/NeoForge
 
 ## 🤖 交给 AI 分析
 
-每份报告开头都有一段机器可读的键值块（`CPU_MODEL`、`GPU_MODEL`、`AVG_FPS`、`P1_LOW_FPS`、`AVG_MSPT` 等）。你可以把整份文件或键值块直接粘贴给任意 AI 进行瓶颈分析。
+每份报告都保留一段机器可读的键值块（放在代码块里，避免 Markdown 表格等语法干扰解析，`MOD_VERSION` 可用于区分不同版本的数据）：
+
+```
+CPU_MODEL: ...
+GPU_MODEL: ...
+MEMORY_TOTAL_MB: ...
+JVM_MAX_MB: ...
+TEST_DURATION_SEC: ...
+AVG_FPS: ...
+MIN_FPS: ...
+P1_LOW_FPS: ...
+AVG_MSPT: ...
+AVG_CPU_PERCENT: ...
+AVG_GPU_PERCENT: ...
+MOD_VERSION: ...
+OS: ...
+```
+
+你可以把整份文件或键值块直接粘贴给任意 AI 进行瓶颈分析。
 
 ## 🔧 配置
 
 模组注册了配置界面（Mods → BenchMark → Config）：
 
 - `reportDirectory` — 报告文件夹（相对游戏目录）。默认：`benchmark_reports`。
+- `reportFormat` — 报告格式：`MARKDOWN`（默认，`.md`）、`PLAIN_TEXT`（旧版，`.txt`）或 `BOTH`（两种都输出）。
 - `defaultTestDuration` — 滑条默认时长（秒）。默认：`30`。
 - `enableGpuUsageDetection` — 是否允许调用外部 GPU 工具/性能计数器。默认：`true`。
 
