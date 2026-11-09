@@ -27,6 +27,13 @@ import java.util.List;
 import com.youyimc.benchmark.client.BenchmarkResult;
 import com.youyimc.benchmark.client.HardwareInfo;
 
+import static com.youyimc.benchmark.client.report.MarkdownDoc.cell;
+import static com.youyimc.benchmark.client.report.MarkdownDoc.fence;
+import static com.youyimc.benchmark.client.report.MarkdownDoc.heading;
+import static com.youyimc.benchmark.client.report.MarkdownDoc.inlineCode;
+import static com.youyimc.benchmark.client.report.MarkdownDoc.row;
+import static com.youyimc.benchmark.client.report.MarkdownDoc.tableHeader;
+
 /**
  * The Markdown report ({@code .md}), the default output since 1.1.0.
  *
@@ -181,51 +188,5 @@ public final class MarkdownReportRenderer implements ReportRenderer {
         heading(sb, 3, title);
         fence(sb, "text", ReportStats.joinSamplesWrapped(samples, SAMPLES_PER_LINE));
         return true;
-    }
-
-    private static void heading(StringBuilder sb, int level, String title) {
-        sb.append("#".repeat(level)).append(' ').append(title).append("\n\n");
-    }
-
-    private static void tableHeader(StringBuilder sb, String... headers) {
-        row(sb, (Object[]) headers);
-        sb.append('|');
-        for (int i = 0; i < headers.length; i++) {
-            sb.append(" --- |");
-        }
-        sb.append('\n');
-    }
-
-    private static void row(StringBuilder sb, Object... values) {
-        sb.append('|');
-        for (Object value : values) {
-            sb.append(' ').append(cell(value)).append(" |");
-        }
-        sb.append('\n');
-    }
-
-    /** Escapes a value so it can live in a Markdown table cell. */
-    private static String cell(Object value) {
-        String text = String.valueOf(value);
-        return text.replace("\\", "\\\\")
-                .replace("|", "\\|")
-                .replace("`", "\\`")
-                .replace("\r", " ")
-                .replace("\n", " ");
-    }
-
-    /** Writes a fenced code block, using a longer fence if the body contains one. */
-    private static void fence(StringBuilder sb, String info, String body) {
-        String trimmed = body.stripTrailing();
-        String fence = trimmed.contains("```") ? "````" : "```";
-        sb.append(fence).append(info).append('\n').append(trimmed).append('\n').append(fence).append("\n\n");
-    }
-
-    /** Wraps a value in inline code, avoiding collisions with backticks in the value. */
-    private static String inlineCode(String value) {
-        if (!value.contains("`")) {
-            return "`" + value + "`";
-        }
-        return "`` " + value + " ``";
     }
 }

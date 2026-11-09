@@ -62,6 +62,25 @@ public final class ReportStats {
         return rows;
     }
 
+    /**
+     * {@return the classic "1% low" metric: the average frame time of the worst
+     * {@code percent} of frames, converted back to FPS}
+     */
+    public static double lowFps(List<Double> frameTimesMs, double percent) {
+        if (frameTimesMs.isEmpty()) {
+            return 0;
+        }
+        List<Double> sorted = new ArrayList<>(frameTimesMs);
+        Collections.sort(sorted);
+        int n = Math.max(1, (int) Math.floor(sorted.size() * percent / 100.0));
+        double sum = 0;
+        for (int i = sorted.size() - n; i < sorted.size(); i++) {
+            sum += sorted.get(i);
+        }
+        double avgMs = sum / n;
+        return avgMs > 0 ? 1000.0 / avgMs : 0;
+    }
+
     public static double minFrameTime(List<Double> frameTimesMs) {
         double min = Double.MAX_VALUE;
         for (double v : frameTimesMs) {

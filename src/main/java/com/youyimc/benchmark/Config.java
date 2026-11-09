@@ -35,6 +35,21 @@ public class Config {
             .comment("Report file format: MARKDOWN (default, .md), PLAIN_TEXT (legacy, .txt) or BOTH.")
             .defineEnum("reportFormat", ReportFormat.MARKDOWN);
 
+    // Which benchmark the pause screen starts: NORMAL or STUTTER analysis.
+    public static final ModConfigSpec.EnumValue<AnalysisMode> ANALYSIS_MODE = BUILDER
+            .comment("Benchmark mode: NORMAL (FPS/TPS report) or STUTTER (JFR based stutter analysis).")
+            .defineEnum("analysisMode", AnalysisMode.NORMAL);
+
+    // JFR execution sampling period used by the stutter analysis (10 or 20 ms).
+    public static final ModConfigSpec.IntValue STUTTER_SAMPLE_PERIOD_MS = BUILDER
+            .comment("Stutter analysis sampling period in milliseconds: 10 (detailed) or 20 (lighter).")
+            .defineInRange("stutterSamplePeriodMs", 20, 10, 20);
+
+    // How many stutter .jfr recordings are kept in the report folder.
+    public static final ModConfigSpec.IntValue RETAINED_JFR_FILES = BUILDER
+            .comment("How many stutter analysis .jfr recordings to keep; the oldest ones are deleted.")
+            .defineInRange("retainedJfrFiles", 1, 1, 10);
+
     // Default test duration in seconds for the duration slider.
     public static final ModConfigSpec.IntValue DEFAULT_TEST_DURATION = BUILDER
             .comment("Default benchmark test duration in seconds.")

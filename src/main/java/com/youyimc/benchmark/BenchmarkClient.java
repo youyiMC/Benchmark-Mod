@@ -21,6 +21,7 @@ package com.youyimc.benchmark;
 
 import com.youyimc.benchmark.client.BenchmarkScreen;
 import com.youyimc.benchmark.client.BenchmarkSession;
+import com.youyimc.benchmark.client.stutter.StutterSession;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -66,15 +67,17 @@ public class BenchmarkClient {
         }
     }
 
-    // Feeds per-frame data into the benchmark session while a test is running.
+    // Feeds per-frame data into the benchmark / stutter sessions while a test is running.
     @SubscribeEvent
     static void onRenderFrame(RenderFrameEvent.Post event) {
         BenchmarkSession.getInstance().onFrame();
+        StutterSession.getInstance().onFrame();
     }
 
     // Ensures the test completes on time even if frames stall (e.g. alt-tab / minimized).
     @SubscribeEvent
     static void onClientTick(ClientTickEvent.Post event) {
         BenchmarkSession.getInstance().tick();
+        StutterSession.getInstance().tick();
     }
 }

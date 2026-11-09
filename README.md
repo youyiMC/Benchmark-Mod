@@ -61,6 +61,27 @@ The document starts like this:
 
 > Minecraft runs its server at **20 TPS = 50 ms per tick**. An average MSPT around 50 ms means the server is running at full speed and is healthy — it is **not** "under pressure". The analysis text in the report follows this logic correctly.
 
+## 🔍 Stutter analysis mode (1.2.0)
+
+The pause-screen menu has a mode switch: **Normal test** (the report above) or **Stutter analysis**. The stutter mode records a Java Flight Recorder session for the whole run and writes `stutter_report_*.md` plus the raw `stutter_*.jfr` next to your normal reports:
+
+| Data | How |
+| --- | --- |
+| CPU attribution per mod | `jdk.ExecutionSample` (20 ms default, 10 ms optional) mapped to mods via their jar packages |
+| Thread states | park / monitor-enter / monitor-wait / sleep events (≥ 1 ms), per thread |
+| Hot methods | the most frequent render-thread methods (class#method), with sample counts |
+| GC correlation | every GC pause with its duration, matched against frames that stuttered |
+| Allocation per mod | `jdk.ObjectAllocationSample` (bytes/s), not retained size |
+| Network | Minecraft's own `minecraft.PacketSent/Received` events: packet id, protocol, count, bytes |
+| Disk | `minecraft.ChunkRegion*` events (dimension, chunk x/z, compression) + `jdk.FileRead/Write` timing |
+| Heap dump | result-screen button (triggers a full GC and pauses the game for a few seconds) |
+
+The stutter detection threshold is `max(50 ms, 2.5 × median frame time)`; each stutter is annotated with the GC pause, disk IO or hot mod that overlapped it.
+
+**Limitations we are explicit about:** CPU attribution is statistical (safepoint sampling bias), JFR adds roughly 1–4% overhead, GPU timing is not part of 1.2.0 (coming in 1.3.0), and with Sodium/Iris the vanilla render-stage hooks are unavailable, so per-mod GPU numbers would be guesses — the report says so in its "conditions" section.
+
+The `reportFormat` setting does not apply to the stutter report (always Markdown). Old `.jfr` files are pruned to the number in `retainedJfrFiles` (default: keep the latest one).
+
 ## 🤖 Report for AI analysis
 
 Each report keeps a machine-friendly key-value block (inside a fenced code block, so the Markdown around it does not interfere):
@@ -89,6 +110,9 @@ The mod registers a config screen (Mods → BenchMark → Config):
 
 - `reportDirectory` — folder (relative to the game dir) for reports. Default: `benchmark_reports`.
 - `reportFormat` — report format: `MARKDOWN` (default, `.md`), `PLAIN_TEXT` (legacy, `.txt`) or `BOTH`.
+- `analysisMode` — `NORMAL` (default) or `STUTTER`; also switchable from the benchmark menu.
+- `stutterSamplePeriodMs` — JFR sampling period for the stutter analysis: `20` (default) or `10` ms; also switchable from the menu.
+- `retainedJfrFiles` — how many stutter `.jfr` recordings to keep. Default: `1`.
 - `defaultTestDuration` — default slider value in seconds. Default: `30`.
 - `enableGpuUsageDetection` — allow querying external GPU tools / performance counters. Default: `true`.
 
@@ -167,6 +191,27 @@ The project scaffold is based on the [NeoForged MDK](https://github.com/NeoForge
 
 > Minecraft 服务器目标为 **20 TPS = 每刻 50ms**。平均 MSPT 约 50ms 表示服务器满速健康运行，而**并非**“压力较大”；报告中的分析文本已按此逻辑正确表述。
 
+## 🔍 卡顿分析模式（1.2.0）
+
+暂停菜菜单里可以切换模式：**普通测试**（上面的报告）或**卡顿分析**。卡顿分析会为整段测试录制一次 Java Flight Recorder，并在报告目录生成 `stutter_report_*.md` 与原始 `stutter_*.jfr`：
+
+| 数据 | 来源 |
+| --- | --- |
+| 逐模组 CPU 归因 | `jdk.ExecutionSample`（默认 20 ms，可切 10 ms），按 mod jar 的包名映射到模组 |
+| 线程状态 | park / 锁竞争 / 锁等待 / sleep 事件（≥ 1 ms），按线程统计 |
+| 热点方法 | 渲染线程采样中出现最多的方法（类#方法名）及样本数 |
+| GC 关联 | 每次 GC 停顿的时长，与发生卡顿的帧对齐 |
+| 逐模组内存分配 | `jdk.ObjectAllocationSample`（字节/秒），只反映分配速率，不含常驻大小 |
+| 网络 | Minecraft 自带的 `minecraft.PacketSent/Received` 事件：包 ID、协议、次数、字节 |
+| 磁盘 | `minecraft.ChunkRegion*` 事件（维度、区块坐标、压缩算法）+ `jdk.FileRead/Write` 耗时 |
+| 堆转储 | 结果页按钮（触发 Full GC 并暂停数秒，文件可达 GB 级） |
+
+卡顿判定阈值为 `max(50 ms, 2.5 × 帧时间中位数)`，每次卡顿会标注与之重叠的 GC 停顿、磁盘 IO 或渲染线程热点模组。
+
+**明确的局限**：CPU 归因是统计采样（存在 safepoint 偏差）；JFR 本身带来约 1–4% 开销；1.2.0 不含 GPU 计时（1.3.0 提供）；Sodium/Iris 下原版渲染阶段钩子失效，逐模组 GPU 数字只能算估算，报告会在“测试条件与局限”中说明。
+
+`reportFormat` 不影响卡顿报告（它固定是 Markdown）。旧的 `.jfr` 会按 `retainedJfrFiles`（默认只保留最近 1 份）自动清理。
+
 ## 🤖 交给 AI 分析
 
 每份报告都保留一段机器可读的键值块（放在代码块里，避免 Markdown 表格等语法干扰解析，`MOD_VERSION` 可用于区分不同版本的数据）：
@@ -195,6 +240,9 @@ OS: ...
 
 - `reportDirectory` — 报告文件夹（相对游戏目录）。默认：`benchmark_reports`。
 - `reportFormat` — 报告格式：`MARKDOWN`（默认，`.md`）、`PLAIN_TEXT`（旧版，`.txt`）或 `BOTH`（两种都输出）。
+- `analysisMode` — `NORMAL`（默认）或 `STUTTER`；也可在测试菜单里切换。
+- `stutterSamplePeriodMs` — 卡顿分析采样间隔：`20`（默认）或 `10` ms；也可在菜单里切换。
+- `retainedJfrFiles` — 保留的 `.jfr` 录制数量。默认：`1`。
 - `defaultTestDuration` — 滑条默认时长（秒）。默认：`30`。
 - `enableGpuUsageDetection` — 是否允许调用外部 GPU 工具/性能计数器。默认：`true`。
 
